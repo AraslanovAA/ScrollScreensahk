@@ -1,51 +1,91 @@
-i := 0
-global x:=0
-global y:=0
-global z:=0
-global xs ="0"
-global ys ="0"
-global zs ="0"
-global adress = "https://prnt.sc/m1o"
-capslock::
-i:= Mod(i+1,2)
-`::
-While i = 1
-{
-sleep 5000
+global SleepTime := 5000 ; пауза между сменой загрузкой следующего изображения
+global adress = "https://prnt.sc/"
+global ArrayOfSymbols := ["0","1","2","3","4","5","6","7","8","9","a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"] ;количество элементов 1-36
+global AdressItems := Object()
+
+
+Numpad1:: ;сохранить начальный адресс
+                   ;msgbox % ArrayOfSymbols[1] " " ArrayOfSymbols[2] " " ArrayOfSymbols[3] " " ArrayOfSymbols[4] " " ArrayOfSymbols[5] " " ArrayOfSymbols[6] " " ArrayOfSymbols[7] " " ArrayOfSymbols[8] " " ArrayOfSymbols[9] " " ArrayOfSymbols[10] " " ArrayOfSymbols[11] " " ArrayOfSymbols[12] " " ArrayOfSymbols[13] " " ArrayOfSymbols[14] " " ArrayOfSymbols[15] " " ArrayOfSymbols[16] " " ArrayOfSymbols[17] " " ArrayOfSymbols[18] " " ArrayOfSymbols[19] " " ArrayOfSymbols[20] " " ArrayOfSymbols[21] " " ArrayOfSymbols[22] " " ArrayOfSymbols[23] " " ArrayOfSymbols[24] " " ArrayOfSymbols[25] " " ArrayOfSymbols[26] " " ArrayOfSymbols[27] " " ArrayOfSymbols[28] " " ArrayOfSymbols[29] " " ArrayOfSymbols[30] " " ArrayOfSymbols[31] " " ArrayOfSymbols[32] " " ArrayOfSymbols[33] " " ArrayOfSymbols[34] " " ArrayOfSymbols[35] " " ArrayOfSymbols[36]
+	NumItem := 6 ; количество обрабатываемых символов
+	
 Send ^{vk4C} ;ctrl+L
-;Send {right}
-;Send {backspace 3}
-INCZ()
-concat = %adress%%xs%%ys%%zs%
+sleep 10
+	While NumItem > 0 
+	{
+	if NumItem = 6
+		Send {right}
+	else
+		Send {left}
+	sleep 10
+	Send +{left} ; shift + left
+	sleep 10
+	Send ^{vk43} ;Ctrl+C
+	AdressItems[NumItem,1] := clipboard
+	AdressItems[NumItem--,2]:=0
+	sleep 10
+	} 
+		EveryItemRecognized := False ; распознаем прочитанные символы и записываем их порядковые номера
+		NumItem:= 1
+		while EveryItemRecognized = False
+		{
+		
+			if NumItem = 7
+				EveryItemRecognized := True
+			else
+			{
+				index:=1
+				while AdressItems[NumItem,2] = 0
+				{
+				if ArrayOfSymbols[index] = AdressItems[NumItem,1]
+				{
+					AdressItems[NumItem,2] := index
+				}
+				else
+					index++
+				}
+				NumItem++
+			}
+		}
+	return
+Numpad2:: ;листаем с текущего адреса вперёд
+ run := 1
+While run = 1
+{
+Send ^{vk4C} ;ctrl+L
+UsingItemNum = 0
+IncAdress(6) ; инкрементируем последний символ в соответствии с ArrayOfSymbols
+concat_1:= AdressItems[1,1] ;изначально конкатанация выглядела так:
+concat_2:= AdressItems[2,1] ;%adress%%AdressItems[1,1]%%AdressItems[2,1]%%AdressItems[3,1]%%AdressItems[4,1]%%AdressItems[5,1]%%AdressItems[6,1]%
+concat_3:= AdressItems[3,1] ; почему конкатанация с символами из массивов невозможна непонятна
+concat_4:= AdressItems[4,1] ; ошибка illegal character
+concat_5:= AdressItems[5,1] ; но если переложить в новую переменную видимо уже легал
+concat_6:= AdressItems[6,1] ; если это неявное преобразование типов, то какой тип изначально при записи в массив?
+concat = %adress%%concat_1%%concat_2%%concat_3%%concat_4%%concat_5%%concat_6%
 Clipboard = %concat%
 Send ^{vk56} ;ctrl+V
-sleep 500
 Send {enter}
-sleep 500
-;send %concat%{enter}
-;MsgBox  «начение в переменной с именем Var равно %concat%.
+sleep SleepTime
 }
 return
-INCZ()
+
+IncAdress(param)
 {
-z:=z+1
-if z > 35
-	INCY()
-Recognize_(z,zs)
-}
-INCY()
+if param = 0
+	msgbox Кажется это предел
+else
 {
-z:=0
-y:=y+1
-if y > 35
-	INCX()
-Recognize_(y,ys)
+	if AdressItems[param,2] <> 36
+		{
+		AdressItems[param,2] := AdressItems[param,2] + 1
+		AdressItems[param,1] := ArrayOfSymbols[AdressItems[param,2]]
+		}
+	else
+	{
+		AdressItems[param,2]:=1
+		AdressItems[param,1]:= ArrayOfSymbols[AdressItems[param,2]]
+		IncAdress(param-1)
+	}
 }
-INCX()
-{
-y:=0
-x:=x+1
-Recognize_(x,xs)
 }
 
 
@@ -54,78 +94,5 @@ Recognize_(x,xs)
 
 
 
-Recognize_(ByRef u,ByRef us)
-{
-if u = 0
-	us:="0"
-if u = 1
-	us:="1"
-if u = 2
-	us:="2"
-if u = 3
-	us:="3"
-if u = 4
-	us:="4"
-if u = 5
-	us:="5"
-if u = 6
-	us:="6"
-if u = 7
-	us:="7"
-if u = 8
-	us:="8"
-if u = 9
-	us:="9"
-if u = 10
-	us:="a"
-if u = 11
-	us:="b"
-if u = 12
-	us:="c"
-if u = 13
-	us:="d"
-if u = 14
-	us:="e"
-if u = 15
-	us:="f"
-if u = 16
-	us:="g"
-if u = 17
-	us:="h"
-if u = 18
-	us:="i"
-if u = 19
-	us:="j"
-if u = 20
-	us:="k"
-if u = 21
-	us:="l"
-if u = 22
-	us:="m"
-if u = 23
-	us:="n"
-if u = 24
-	us:="o"
-if u = 25
-	us:="p"
-if u = 26
-	us:="q"
-if u = 27
-	us:="r"
-if u = 28
-	us:="s"
-if u = 29
-	us:="t"
-if u = 30
-	us:="u"
-if u = 31
-	us:="v"
-if u = 32
-	us:="w"
-if u = 33
-	us:="x"
-if u = 34
-	us:="y"
-if u = 35
-	us:="z"
-}
+
+
